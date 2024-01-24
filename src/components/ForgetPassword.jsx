@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Link } from 'react-router-dom'
 import { forgetPassword } from '../services/users'
@@ -6,13 +6,17 @@ import { toast } from 'react-toastify'
 
 function ForgetPassword() {
   const { register, handleSubmit, formState: { errors }, reset } = useForm()
+  const [isLoading, setIsLoading] = useState(false)
 
   const foregetPasswordHandler = async (data) => {
+    setIsLoading(true)
     try {
       const res = await forgetPassword(data)
+      setIsLoading(false);
       toast.success(res.data.message)
       reset()
     } catch (error) {
+      setIsLoading(false)
       toast.error(error.response.data.message)
     }
   }
@@ -44,7 +48,7 @@ function ForgetPassword() {
                 type="submit"
                 className="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
               >
-                Reset Password
+                { isLoading ? 'Resetting...' : 'Reset Password' }
               </button>
               <p className="text-sm font-light text-gray-500 dark:text-gray-400">
                 Remember your password? <Link to="/login" className='font-medium text-primary-600 hover:underline dark:text-primary-500'>Sign In</Link>
