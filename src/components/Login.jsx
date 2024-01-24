@@ -36,7 +36,7 @@ function Login() {
                     <label htmlFor="remember" className="text-gray-500 dark:text-gray-300">Remember me</label>
                   </div>
                 </div>
-                <a href="#" className="text-sm font-medium text-primary-600 hover:underline">Forgot password?</a>
+                <Link to="/forget-password" className='text-sm font-medium text-primary-600 hover:underline'>Forgot password?</Link>
               </div>
               <button type="submit" className="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Sign in</button>
               <p className="text-sm font-light text-gray-500 dark:text-gray-400">

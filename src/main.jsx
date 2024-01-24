@@ -6,12 +6,16 @@ import Layout from "./components/others/Layout"
 import RouteError from "./components/others/RouteError"
 import Login from './components/Login'
 import Register from './components/Register'
+import ForgetPassword from './components/ForgetPassword'
+import ResetPassword from './components/ResetPassword'
 
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path='/' element={<Layout />} errorElement={<RouteError />} >
-      <Route path="/login" element={<Login />} />
+      <Route path='/login' element={<Login />} />
       <Route path='/register' element={<Register />} />
+      <Route path='/forget-password' element={<ForgetPassword />} />
+      <Route path='/reset-password' element={<ResetPassword />} />
     </Route>
   )
 )
