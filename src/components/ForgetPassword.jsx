@@ -1,12 +1,20 @@
 import React from 'react'
 import { useForm } from 'react-hook-form'
 import { Link } from 'react-router-dom'
+import { forgetPassword } from '../services/users'
+import { toast } from 'react-toastify'
 
 function ForgetPassword() {
-  const { register, handleSubmit, formState: { errors } } = useForm()
+  const { register, handleSubmit, formState: { errors }, reset } = useForm()
 
-  const foregetPasswordHandler = (data) => {
-    console.log(data);
+  const foregetPasswordHandler = async (data) => {
+    try {
+      const res = await forgetPassword(data)
+      toast.success(res.data.message)
+      reset()
+    } catch (error) {
+      toast.error(error.response.data.message)
+    }
   }
   return (
     <section className="bg-gray-50 dark:bg-gray-900">
