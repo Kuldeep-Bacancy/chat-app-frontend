@@ -1,12 +1,25 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Link } from 'react-router-dom'
+import { registerUser } from '../services/users'
+import { toast } from 'react-toastify'
+
 
 function Register() {
-  const { register, handleSubmit, formState: { errors } } = useForm()
+  const { register, handleSubmit, formState: { errors }, reset } = useForm()
+  const [isLoading, setIsLoading] = useState(false)
 
-  const registerHandler = (data) => {
-    console.log(data);
+  const registerHandler = async (data) => {
+    setIsLoading(true)
+    try {
+      const res = await registerUser(data)
+      setIsLoading(false);
+      toast.success(res.data.message)
+      reset()
+    } catch (error) {
+      setIsLoading(false)
+      toast.error(error.response.data.errors[0])
+    }
   }
 
   return (
@@ -38,7 +51,9 @@ function Register() {
                 <input type="password" name="confirm-password" id="confirm-password" placeholder="••••••••" className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required="" {...register('confirmPassword', { required: 'confirm-password is required!' })} />
                 <p className='error'>{errors.confirmPassword?.message}</p>
               </div>
-              <button type="submit" className="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Create a account</button>
+              <button type="submit" className="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">
+              { isLoading ? 'Creating a account...' : 'Create a account' }
+              </button>
               <p className="text-sm font-light text-gray-500 dark:text-gray-400">
                 Already have an account? <Link to="/login" className='font-medium text-primary-600 hover:underline dark:text-primary-500"'>Login here</Link>
               </p>
