@@ -1,13 +1,27 @@
 import React from 'react'
 import { useForm } from 'react-hook-form'
 import { Link } from 'react-router-dom'
+import { loginUser } from '../services/users'
+import { login } from '../features/authSlice'
+import { useDispatch } from 'react-redux'
+import { toast } from 'react-toastify'
 
 function Login() {
   const { register, handleSubmit, formState: { errors } } = useForm()
+  const dispatch = useDispatch()
 
-  const loginHandler = (data) => {
-    console.log(data);
+  const loginHandler = async (data) => {
+    try {
+      const res = await loginUser(data)
+      dispatch(login(res.data.data))
+      localStorage.setItem('accessToken', JSON.stringify(res.data.data.accessToken))
+      localStorage.setItem('refreshToken', JSON.stringify(res.data.data.refreshToken))
+      toast.success(res.data.message)
+    } catch (error) {
+      toast.error(error.response.data.message)
+    }
   }
+
   return (
     <section className="bg-gray-50 dark:bg-gray-900">
       <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
