@@ -1,12 +1,13 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { logout } from '../features/authSlice';
 import { logoutUser } from '../services/users';
 
 
 function Header() {
   const dispatch = useDispatch()
+  const navigate = useNavigate()
   const isLoggedin = useSelector(state => state.authentication.isAuthenticated)
 
   const handleLogout = async () => {
@@ -14,6 +15,7 @@ function Header() {
     dispatch(logout())
     localStorage.removeItem('accessToken')
     localStorage.removeItem('refreshToken')
+    navigate('/')
   }
 
   return (

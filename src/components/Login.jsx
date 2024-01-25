@@ -1,6 +1,6 @@
 import React from 'react'
 import { useForm } from 'react-hook-form'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { loginUser } from '../services/users'
 import { login } from '../features/authSlice'
 import { useDispatch } from 'react-redux'
@@ -9,6 +9,7 @@ import { toast } from 'react-toastify'
 function Login() {
   const { register, handleSubmit, formState: { errors } } = useForm()
   const dispatch = useDispatch()
+  const navigate = useNavigate()
 
   const loginHandler = async (data) => {
     try {
@@ -17,6 +18,7 @@ function Login() {
       localStorage.setItem('accessToken', JSON.stringify(res.data.data.accessToken))
       localStorage.setItem('refreshToken', JSON.stringify(res.data.data.refreshToken))
       toast.success(res.data.message)
+      navigate('/chats')
     } catch (error) {
       toast.error(error.response.data.message)
     }
