@@ -35,21 +35,28 @@ function Header() {
         </NavLink>
       </h1>
       <div className="flex items-center">
-        <button
-          className="text-white bg-blue-500 hover:bg-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium rounded-full text-sm px-4 py-2.5 text-center me-2 mb-2"
-          onClick={() => { setShowModal(true) }}
-        >
-          Search User
-        </button>
+        {
+          isLoggedin &&
+          <button
+            className="text-white bg-blue-500 hover:bg-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium rounded-full text-sm px-4 py-2.5 text-center me-2 mb-2"
+            onClick={() => { setShowModal(true) }}
+          >
+            Search User
+          </button>
+        }
         {
           showModal && <SearchUserModal setShowModal={setShowModal} />
         }
-        <button
-          className="text-white bg-yellow-500 hover:bg-yellow-600 focus:outline-none focus:ring-4 focus:ring-yellow-300 font-medium rounded-full text-sm px-4 py-2.5 text-center me-2 mb-2"
-          onClick={() => { setShowGroupModal(true) }}
-        >
-          Create Group
-        </button>
+        {
+          isLoggedin && 
+          <button
+            className="text-white bg-yellow-500 hover:bg-yellow-600 focus:outline-none focus:ring-4 focus:ring-yellow-300 font-medium rounded-full text-sm px-4 py-2.5 text-center me-2 mb-2"
+            onClick={() => { setShowGroupModal(true) }}
+          >
+            Create Group
+          </button>
+        }
+        
         {
           showGroupModal && <CreateGroupModal setShowGroupModal={setShowGroupModal} />
         }
