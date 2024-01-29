@@ -27,3 +27,9 @@ export const resetPassword = async (data) => {
   const response = await axiosPublic.post(`${backendURL}/users/reset-password`, data)
   return response
 }
+
+export const searchUsers = async (data) => {
+  const { search } = data
+  const response = await axiosPrivate.get(`${backendURL}/users?search=${search}`)
+  return response
+}
