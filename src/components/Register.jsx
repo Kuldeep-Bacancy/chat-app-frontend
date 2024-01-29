@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { registerUser } from '../services/users'
 import { toast } from 'react-toastify'
 
@@ -8,6 +8,7 @@ import { toast } from 'react-toastify'
 function Register() {
   const { register, handleSubmit, formState: { errors }, reset } = useForm()
   const [isLoading, setIsLoading] = useState(false)
+  const navigate = useNavigate()
 
   const registerHandler = async (data) => {
     setIsLoading(true)
@@ -16,6 +17,7 @@ function Register() {
       setIsLoading(false);
       toast.success(res.data.message)
       reset()
+      navigate('/login')
     } catch (error) {
       setIsLoading(false)
       toast.error(error.response.data.errors[0])
