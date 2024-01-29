@@ -4,6 +4,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { logout } from '../features/authSlice';
 import { logoutUser } from '../services/users';
 import SearchUserModal from './SearchUserModal';
+import CreateGroupModal from './CreateGroupModal';
 
 
 function Header() {
@@ -11,6 +12,7 @@ function Header() {
   const navigate = useNavigate()
   const isLoggedin = useSelector(state => state.authentication.isAuthenticated)
   const [showModal, setShowModal] = useState(false)
+  const [showGroupModal, setShowGroupModal] = useState(false)
 
   const handleLogout = async () => {
     await logoutUser()
@@ -41,6 +43,15 @@ function Header() {
         </button>
         {
           showModal && <SearchUserModal setShowModal={setShowModal} />
+        }
+        <button
+          className="text-white bg-yellow-500 hover:bg-yellow-600 focus:outline-none focus:ring-4 focus:ring-yellow-300 font-medium rounded-full text-sm px-4 py-2.5 text-center me-2 mb-2"
+          onClick={() => { setShowGroupModal(true) }}
+        >
+          Create Group
+        </button>
+        {
+          showGroupModal && <CreateGroupModal setShowGroupModal={setShowGroupModal} />
         }
 
         {isLoggedin && (

@@ -11,3 +11,8 @@ export const getCurrentUserChats = async () => {
   const response = await axiosPrivate.get(`${backendURL}/chats`)
   return response
 }
+
+export const createGroup = async (data) => {
+  const response = await axiosPrivate.post(`${backendURL}/chats/group`, data)
+  return response
+}
