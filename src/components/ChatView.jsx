@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { fetchChat } from '../services/chats';
 import { useQuery } from '@tanstack/react-query';
 import { useSelector } from 'react-redux';
+import GroupSettingsModal from './GroupSettingsModal';
 
 function ChatView({ chatId }) {
   if (!chatId) {
@@ -16,6 +17,7 @@ function ChatView({ chatId }) {
 
   const userInfo = useSelector(state => state.authentication.userData)
   const [inputMessage, setInputMessage] = useState('');
+  const [showModal, setShowModal] = useState(false)
 
   const chat = useQuery({
     queryKey: ['chat', chatId],
@@ -23,6 +25,7 @@ function ChatView({ chatId }) {
   })
 
   const chatData = chat.data?.data?.data
+  const groupUsers = chatData?.users.map((option) => { return { value: option?._id, label: option?.username, color: '#0052CC' } })
 
   // Sample static data for testing
   const chatName = chatData?.isGroupChat ? chatData?.name : chatData?.users.find((user) => user._id !== userInfo._id)?.username
@@ -50,12 +53,15 @@ function ChatView({ chatId }) {
         <h2 className='text-xl font-bold text-white'>{chatName}</h2>
         {
           chatData?.isGroupChat &&
-          <button className='text-white hover:text-gray-200'>
+          <button className='text-white hover:text-gray-200' onClick={() => setShowModal(true)}>
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 14 12 8" />
               <circle cx="12" cy="12" r="10" />
             </svg>
           </button>
+        }
+        {
+          showModal && <GroupSettingsModal setShowModal={setShowModal} groupId={chatData._id} groupUsers={groupUsers} />
         }
       </div>
 
