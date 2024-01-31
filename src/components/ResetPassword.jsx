@@ -2,12 +2,13 @@ import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { resetPassword } from '../services/users'
 import { toast } from 'react-toastify'
-import { useSearchParams } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 
 function ResetPassword() {
   const { register, handleSubmit, formState: { errors }, reset } = useForm()
   const [searchParams, setSearchParams] = useSearchParams();
   const [isLoading, setIsLoading] = useState(false)
+  const navigate = useNavigate()
 
   const resetPasswordHandler = async (data) => {
     setIsLoading(true)
@@ -17,6 +18,7 @@ function ResetPassword() {
       const res = await resetPassword(newData)
       setIsLoading(false)
       toast.success(res.data.message)
+      navigate('/login')
       reset()
     } catch (error) {
       setIsLoading(false)
