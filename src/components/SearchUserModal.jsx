@@ -3,8 +3,11 @@ import { useForm } from 'react-hook-form'
 import { searchUsers } from '../services/users'
 import { createChat } from '../services/chats'
 import { toast } from 'react-toastify'
+import { useQueryClient } from '@tanstack/react-query'
+
 
 function SearchUserModal({ setShowModal }) {
+  const queryClient = useQueryClient() 
   const { register, handleSubmit, formState: { errors } } = useForm()
   const [searchResults, setSearchResults] = useState([])
 
@@ -16,6 +19,9 @@ function SearchUserModal({ setShowModal }) {
   const createChatHandler = async (userId) => {
     try {
       const response = await createChat(userId)
+      queryClient.invalidateQueries({
+        queryKey: ['chats']
+      })
       setShowModal(false)
       toast.success(response.data?.message)
     } catch (error) {
