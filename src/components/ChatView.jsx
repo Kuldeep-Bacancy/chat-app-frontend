@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { fetchChat } from '../services/chats';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSelector } from 'react-redux';
 import GroupSettingsModal from './GroupSettingsModal';
 import { createMessage, getMessages } from '../services/messages';
 import { useForm } from 'react-hook-form';
+import io from "socket.io-client"
 
 function ChatView({ chatId }) {
   if (!chatId) {
@@ -16,8 +17,28 @@ function ChatView({ chatId }) {
       </div>
     );
   }
+  const socket = io(import.meta.env.VITE_SOCKET_URL, { transports: ['websocket', 'polling', 'flashsocket'] })
 
-  const queryClient = useQueryClient();
+  const queryClient = useQueryClient()
+
+  useEffect(() => {
+    socket.emit("join-chat", chatId)
+
+    return () => {
+      socket.disconnect();
+    }
+  }, [chatId])
+
+
+  useEffect(() => {
+    socket.on('message-received', (newMessage) => {
+      if (chatId != newMessage?.chat?._id) return
+      queryClient.invalidateQueries({
+        queryKey: ['messages', chatId],
+      });
+    })
+  }, [chatId])
+
   const userInfo = useSelector((state) => state.authentication.userData);
   const [showModal, setShowModal] = useState(false);
   const { register, handleSubmit, reset } = useForm();
@@ -25,16 +46,19 @@ function ChatView({ chatId }) {
   const chat = useQuery({
     queryKey: ['chat', chatId],
     queryFn: () => fetchChat(chatId),
+    enabled: !!chatId
   });
 
   const messages = useQuery({
     queryKey: ['messages', chatId],
     queryFn: () => getMessages(chatId),
+    enabled: !!chatId
   });
 
   const sendMessageHandler = async (data) => {
     try {
-      await createMessage(data);
+      const res = await createMessage(data);
+      socket.emit("new-message", res?.data?.data)
       reset();
     } catch (error) {
       console.log('error', error.response);
@@ -55,12 +79,12 @@ function ChatView({ chatId }) {
   };
 
   const chatData = chat.data?.data?.data;
-  const groupUsers = chatData?.users.map((option) => ({
+  const groupUsers = chatData?.users?.map((option) => ({
     value: option?._id,
     label: option?.username,
     color: '#0052CC',
   }));
-  const chatName = chatData?.isGroupChat ? chatData?.name : chatData?.users.find((user) => user._id !== userInfo._id)?.username;
+  const chatName = chatData?.isGroupChat ? chatData?.name : chatData?.users?.find((user) => user._id !== userInfo._id)?.username;
 
   return (
     <div className="flex flex-col bg-gray-400 w-2/3 p-2">
@@ -68,7 +92,7 @@ function ChatView({ chatId }) {
         <h2 className="text-xl font-bold text-white">{chatName}</h2>
         {chatData?.isGroupChat && (
           <button className="text-white hover:text-gray-200" onClick={() => setShowModal(true)}>
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
+            <svg xmlns="http://www.w3.org/2000/s/*-/*//-/-/-/-/-/-*//*/-*/-*/-*/vg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 14 12 8" />
               <circle cx="12" cy="12" r="10" />
             </svg>
@@ -81,8 +105,13 @@ function ChatView({ chatId }) {
       <div className="flex-grow mb-2">
         {messages?.data?.data?.data.map((message, index) => (
           <div key={index} className={`flex items-start ${message.sender._id === userInfo._id ? 'justify-end' : 'justify-start'}`}>
-            <div className={`bg-${message.sender._id === userInfo._id ? 'blue' : 'gray'}-500 text-white p-2 rounded-md mb-1`}>
-              {message.content}
+            <div className={`bg-${message.sender._id === userInfo._id ? 'blue' : 'yellow'}-500 text-white p-2 rounded-md mb-1`}>
+              <div className="flex items-center">
+                {
+                  message.chat?.isGroupChat && <div className="font-bold mr-2">{message.sender.username}:</div>
+                }
+                <div>{message.content}</div>
+              </div>
             </div>
           </div>
         ))}
