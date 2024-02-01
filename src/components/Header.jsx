@@ -5,6 +5,7 @@ import { logout } from '../features/authSlice';
 import { logoutUser } from '../services/users';
 import SearchUserModal from './SearchUserModal';
 import CreateGroupModal from './CreateGroupModal';
+import { toast } from 'react-toastify';
 
 
 function Header() {
@@ -20,6 +21,7 @@ function Header() {
     localStorage.removeItem('accessToken')
     localStorage.removeItem('refreshToken')
     navigate('/')
+    toast.success("Logout successfully!")
   }
 
   return (
