@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { fetchChat } from '../services/chats';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSelector } from 'react-redux';
@@ -8,26 +8,29 @@ import { useForm } from 'react-hook-form';
 import io from "socket.io-client"
 
 function ChatView({ chatId }) {
-  if (!chatId) {
-    return (
-      <div className="flex flex-col bg-gray-400 w-2/3 p-2">
-        <div className="text-center p-4 bg-yellow-200 rounded-lg w-full max-w-md">
-          Click on a chat to start a conversation
-        </div>
-      </div>
-    );
-  }
-  const socket = io(import.meta.env.VITE_SOCKET_URL, { transports: ['websocket', 'polling', 'flashsocket'] })
+  const socket = useMemo(() => { 
+    return io(import.meta.env.VITE_SOCKET_URL, { transports: ['websocket', 'polling', 'flashsocket'] }) 
+  },[chatId])
+  
 
   const queryClient = useQueryClient()
+  const userInfo = useSelector((state) => state.authentication.userData);
+  const [showModal, setShowModal] = useState(false);
+  const [typing, setTyping] = useState(false);
+  const [istyping, setIsTyping] = useState(false);
+  const { register, handleSubmit, reset } = useForm();
 
   useEffect(() => {
-    socket.emit("join-chat", chatId)
+    if(chatId) {
+      socket.emit("join-chat", chatId)
+      socket.on("typing", () => setIsTyping(true));
+      socket.on("stop typing", () => setIsTyping(false));
+    }
 
     return () => {
       socket.disconnect();
     }
-  }, [chatId])
+  }, [chatId, socket])
 
 
   useEffect(() => {
@@ -38,10 +41,6 @@ function ChatView({ chatId }) {
       });
     })
   }, [chatId])
-
-  const userInfo = useSelector((state) => state.authentication.userData);
-  const [showModal, setShowModal] = useState(false);
-  const { register, handleSubmit, reset } = useForm();
 
   const chat = useQuery({
     queryKey: ['chat', chatId],
@@ -76,6 +75,26 @@ function ChatView({ chatId }) {
 
   const sendMessageSubmitHandler = (data) => {
     sendMessageMutation.mutate({ ...data, chatId: chatId });
+  };
+
+  const typingHandler = () => {
+    if (!typing) {
+      setTyping(true);
+      socket.emit("typing", chatId);
+    }
+
+    //debounce/throttle function
+    let lastTypingTime = new Date().getTime();
+    var timerLength = 3000;
+
+    setTimeout(() => {
+      var timeNow = new Date().getTime();
+      var timeDiff = timeNow - lastTypingTime;
+      if (timeDiff >= timerLength && typing) {
+        socket.emit("stop typing", chatId);
+        setTyping(false);
+      }
+    }, timerLength);
   };
 
   const chatData = chat.data?.data?.data;
@@ -117,6 +136,18 @@ function ChatView({ chatId }) {
         ))}
       </div>
 
+      {
+        istyping &&
+
+        <div className="flex items-center justify-start mb-2">
+          <div className="animate-typing">
+            <div className="w-4 h-4 bg-blue-500 rounded-full mr-2"></div>
+            <div className="w-4 h-4 bg-blue-500 rounded-full mr-2"></div>
+            <div className="w-4 h-4 bg-blue-500 rounded-full"></div>
+          </div>
+        </div>
+      }
+
       {/* Input for new messages */}
       <div className="flex gap-2 mx-2">
         <form onSubmit={handleSubmit(sendMessageSubmitHandler)} className="flex-grow flex items-center">
@@ -125,6 +156,7 @@ function ChatView({ chatId }) {
             placeholder="Type your message here"
             className="bg-white border p-2 rounded-l-md focus:outline-none focus:border-blue-500 flex-grow"
             {...register('content', { required: 'Content is required!' })}
+            onChange={typingHandler}
           />
           <button
             className="bg-blue-500 p-2 text-white rounded-r-md hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300"

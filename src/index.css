@@ -7,3 +7,22 @@
   font-size: 12px;
   text-align: left;
 }
+
+@keyframes typing {
+  0% {
+    opacity: 0.5;
+  }
+
+  50% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0.5;
+  }
+}
+
+.animate-typing>div {
+  animation: typing 1.5s infinite;
+  display: inline-block;
+}
