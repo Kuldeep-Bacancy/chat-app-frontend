@@ -26,7 +26,7 @@ function UpdateGroupMembers({ groupId, groupUsers }) {
   const updateGroupMemberssubmitHandler = async () => {
     const newData = { groupId: groupId, userIds: selectedOption.map((user) => user.value) }
     console.log("newData", newData);
-    
+    // const response = await updateGroupMembers(newData)
   }
   return (
     <form id='group-members-Form' onSubmit={handleSubmit(updateGroupMemberssubmitHandler)}>
