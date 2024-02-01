@@ -6,6 +6,8 @@ import GroupSettingsModal from './GroupSettingsModal';
 import { createMessage, getMessages } from '../services/messages';
 import { useForm } from 'react-hook-form';
 import io from "socket.io-client"
+import { formatTimestamp } from '../helpers/DateHelpers';
+
 
 function ChatView({ chatId }) {
   const socket = useMemo(() => {
@@ -142,6 +144,7 @@ function ChatView({ chatId }) {
                           }
                           <div>{message.content}</div>
                         </div>
+                        <div className="text-xs text-gray-500 mt-1">{formatTimestamp(message.createdAt)}</div>
                       </div>
                     </div>
                   ))
