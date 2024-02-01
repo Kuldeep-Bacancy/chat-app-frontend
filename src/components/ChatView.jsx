@@ -104,6 +104,7 @@ function ChatView({ chatId }) {
     value: option?._id,
     label: option?.username,
     color: '#0052CC',
+    isFixed: option?._id == userInfo._id
   }));
   const chatName = chatData?.isGroupChat ? chatData?.name : chatData?.users?.find((user) => user._id !== userInfo._id)?.username;
 
