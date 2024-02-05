@@ -14,7 +14,6 @@ function UpdateGroupName({ groupId }) {
       toast.success(response.data?.message)
       reset()
     } catch (error) {
-      setShowModal(false)
       toast.error(error.response?.data?.message)
       reset()
     }
