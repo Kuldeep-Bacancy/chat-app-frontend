@@ -7,6 +7,7 @@ import { createMessage, getMessages } from '../services/messages';
 import { useForm } from 'react-hook-form';
 import io from "socket.io-client"
 import { formatTimestamp } from '../helpers/DateHelpers';
+import ButtonLoader from './others/ButtonLoader';
 
 
 function ChatView({ chatId }) {
@@ -210,11 +211,18 @@ function ChatView({ chatId }) {
                 <button
                   className="bg-blue-500 p-2 text-white rounded-r-md hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300"
                   type="submit"
+                    disabled={sendMessageMutation.status == 'pending'}
                 >
-                  {/* Change the send icon or use your own */}
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5" />
-                  </svg>
+                  {
+                    sendMessageMutation.status == 'pending' ? (
+                      <ButtonLoader />
+                  ) : (
+                    // Display the send icon when not loading
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5" />
+                    </svg>
+                  )
+                  }
                 </button>
               </form>
             </div>
