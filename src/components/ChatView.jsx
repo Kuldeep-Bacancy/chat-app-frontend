@@ -8,6 +8,7 @@ import { useForm } from 'react-hook-form';
 import io from "socket.io-client"
 import { formatTimestamp } from '../helpers/DateHelpers';
 import ButtonLoader from './others/ButtonLoader';
+import { toast } from 'react-toastify';
 
 
 function ChatView({ chatId }) {
@@ -65,7 +66,7 @@ function ChatView({ chatId }) {
       socket.emit("new-message", res?.data?.data)
       reset();
     } catch (error) {
-      console.log('error', error.response);
+      toast.error(error?.response?.data?.message)
     }
   };
 
