@@ -58,10 +58,9 @@ function ChatView({ chatId }) {
 
   const sendMessageHandler = async (data) => {
     try {
-      // const files = Object.values(data.attachments)
-      // const newData = { chatId: data.chatId, content: data.content, images: files }
-      // console.log(newData);
-      const res = await createMessage(data);
+      const files = Object.values(data.attachments)
+      const newData = { chatId: data.chatId, content: data.content, attachments: files }
+      const res = await createMessage(newData);
       socket.emit("new-message", res?.data?.data)
       reset();
     } catch (error) {
