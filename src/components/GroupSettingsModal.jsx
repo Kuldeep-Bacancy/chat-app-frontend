@@ -2,7 +2,7 @@ import React from 'react'
 import UpdateGroupName from './UpdateGroupName'
 import UpdateGroupMembers from './UpdateGroupMembers';
 
-function GroupSettingsModal({ setShowModal, groupId, groupUsers }) {
+function GroupSettingsModal({ setShowModal, groupId, groupUsers, groupAdminName }) {
 
   return (
     <>
@@ -27,6 +27,7 @@ function GroupSettingsModal({ setShowModal, groupId, groupUsers }) {
               </button>
             </div>
             <div className="relative p-6 flex-auto">
+              <p className="text-lg text-gray-600">Group Admin: {groupAdminName}</p>
               <UpdateGroupName groupId={ groupId } />
               <UpdateGroupMembers groupId={ groupId } groupUsers={ groupUsers }/>
             </div>
