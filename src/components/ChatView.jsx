@@ -58,6 +58,9 @@ function ChatView({ chatId }) {
 
   const sendMessageHandler = async (data) => {
     try {
+      // const files = Object.values(data.attachments)
+      // const newData = { chatId: data.chatId, content: data.content, images: files }
+      // console.log(newData);
       const res = await createMessage(data);
       socket.emit("new-message", res?.data?.data)
       reset();
@@ -105,6 +108,7 @@ function ChatView({ chatId }) {
     label: option?.username,
     color: '#0052CC'
   }));
+  const groupAdminName = chatData?.groupAdmin?.username
   const chatName = chatData?.isGroupChat ? chatData?.name : chatData?.users?.find((user) => user._id !== userInfo._id)?.username;
 
   return (
@@ -125,7 +129,7 @@ function ChatView({ chatId }) {
                   </svg>
                 </button>
               )}
-              {showModal && <GroupSettingsModal setShowModal={setShowModal} groupId={chatData._id} groupUsers={groupUsers} />}
+                {showModal && <GroupSettingsModal setShowModal={setShowModal} groupId={chatData._id} groupUsers={groupUsers} groupAdminName={groupAdminName} />}
             </div>
             <div className="flex-grow mb-2">
               {
@@ -135,19 +139,29 @@ function ChatView({ chatId }) {
                     </div>
                 ) :
                 (
-                  messages?.data?.data?.data.map((message, index) => (
-                    <div key={index} className={`flex items-start ${message.sender._id === userInfo._id ? 'justify-end' : 'justify-start'}`}>
-                      <div className={`bg-${message.sender._id === userInfo._id ? 'blue' : 'yellow'}-500 text-white p-2 rounded-md mb-1`}>
-                        <div className="flex items-center">
-                          {
-                            message.chat?.isGroupChat && <div className="font-bold mr-2">{message.sender.username}:</div>
-                          }
-                          <div>{message.content}</div>
+                      messages?.data?.data?.data.map((message, index) => (
+                        <div key={index} className={`flex items-start ${message.sender._id === userInfo._id ? 'justify-end' : 'justify-start'}`}>
+                          <div className={`bg-${message.sender._id === userInfo._id ? 'blue' : 'yellow'}-500 text-white p-2 rounded-md mb-1`}>
+                            <div className="flex items-center">
+                              {message.chat?.isGroupChat && <div className="font-bold mr-2">{message.sender.username}:</div>}
+                              <div>{message.content}</div>
+                            </div>
+                            {message.attachments && message.attachments.length > 0 && (
+                              <div className='attachments'>
+                                <ul>
+                                  {message.attachments.map((attachment, attachmentIndex) => (
+                                    <li key={attachmentIndex}>
+                                      <a href={attachment.url} target="_blank" rel="noopener noreferrer">{attachment.name}</a>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+                            <div className="text-xs text-gray-500 mt-1">{formatTimestamp(message.createdAt)}</div>
+                          </div>
                         </div>
-                        <div className="text-xs text-gray-500 mt-1">{formatTimestamp(message.createdAt)}</div>
-                      </div>
-                    </div>
-                  ))
+                      ))
+
                 )
               }
             </div>
@@ -171,7 +185,14 @@ function ChatView({ chatId }) {
                   onChange={typingHandler}
                 />
                 <label htmlFor="fileInput" className="bg-blue-200 text-gray-600 p-2 text-white mx-1 cursor-pointer">
-                  <input id="fileInput" type="file" className="hidden" accept="image/x-png,image/gif,image/jpeg" />
+                  <input 
+                    id="fileInput" 
+                    type="file" 
+                    className="hidden" 
+                    accept="image/x-png,image/gif,image/jpeg"
+                    multiple
+                    {...register('attachments')}
+                  />
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"

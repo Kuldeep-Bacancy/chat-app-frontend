@@ -23,13 +23,34 @@ function UpdateGroupMembers({ groupId, groupUsers }) {
     return options
   }
 
-  const updateGroupMemberssubmitHandler = async () => {
-    const newData = { groupId: groupId, userIds: selectedOption.map((user) => user.value) }
-    console.log("newData", newData);
-    // const response = await updateGroupMembers(newData)
+  const updateGroupMembersHandler = async () => {
+    try {
+      const newData = { groupId: groupId, userIds: selectedOption.map((user) => user.value) }
+      const response = await updateGroupMembers(newData)
+      toast.success(response?.data?.message)
+      queryClient.invalidateQueries({
+        queryKey: ['chat', groupId],
+      });
+    } catch (error) {
+      toast.error(error?.response?.data?.message)
+    }
   }
+
+  const updateGroupMembersMutation = useMutation({
+    mutationFn: updateGroupMembersHandler,
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['chat', groupId]
+      })
+    }
+  })
+
+  const updateGroupMembersSubmitHandler = (data) => {
+    updateGroupMembersMutation.mutate(data)
+  }
+
   return (
-    <form id='group-members-Form' onSubmit={handleSubmit(updateGroupMemberssubmitHandler)}>
+    <form id='group-members-Form' onSubmit={handleSubmit(updateGroupMembersSubmitHandler)}>
       <label htmlFor="users[]" className="block text-sm font-medium text-gray-700 mt-3 mb-3">Members</label>
       <Controller
         control={control}
