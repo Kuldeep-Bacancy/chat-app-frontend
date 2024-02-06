@@ -251,7 +251,7 @@ function ChatView({ chatId }) {
                       messages?.data?.data?.data.map((message, index) => (
                         <div 
                           key={index} 
-                          className={`flex items-start ${message.sender._id === userInfo._id ? 'justify-end' : 'justify-start'} ${deleteMessageMutation.status == 'pending' && hoveredMessage === message._id ? 'fade-out' : ''}`}
+                          className={`flex items-start ${message.sender._id === userInfo._id ? 'justify-end' : 'justify-start'} ${deleteMessageMutation.status == 'pending' && hoveredMessage === message._id ? '' : 'message-animation active'}`}
                         >
                           <div
                             className={`bg-${message.sender._id === userInfo._id ? 'blue' : 'yellow'}-500 text-white p-2 rounded-md mb-1 relative`}
