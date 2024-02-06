@@ -11,3 +11,13 @@ export const getMessages = async (chatId) => {
   const response = await axiosPrivate.get(`${backendURL}/messages/${chatId}`)
   return response
 } 
+
+export const deleteMessage = async (msgId) => {
+  const response = await axiosPrivate.delete(`${backendURL}/messages/${msgId}`)
+  return response
+}
+
+export const deleteAllMessages = async (chatId) => {
+  const response = await axiosPrivate.post(`${backendURL}/messages/${chatId}`)
+  return response
+}
