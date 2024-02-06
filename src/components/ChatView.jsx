@@ -274,7 +274,7 @@ function ChatView({ chatId }) {
                             <div className="text-xs text-gray-500 mt-1">{formatTimestamp(message.createdAt)}</div>
                             { /* Delete Button */}
                             {
-                              hoveredMessage === message._id && (
+                              (hoveredMessage === message._id && message.sender._id === userInfo._id) && (
                                 deleteMessageMutation.status == 'pending' ? <ButtonLoader /> :
                                 <button
                                   className="absolute top-0 right-0 text-white hover:text-gray-200 focus:outline-none ml-2"
