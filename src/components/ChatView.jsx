@@ -24,6 +24,7 @@ function ChatView({ chatId }) {
   const [istyping, setIsTyping] = useState(false);
   const [showOptions, setShowOptions] = useState(false);
   const [hoveredMessage, setHoverdMessage] = useState(null)
+  const [deleteMessageId, setDeleteMessageId] = useState(null)
   const { register, handleSubmit, reset } = useForm();
   const optionsRef = useRef(null);
 
@@ -107,8 +108,14 @@ function ChatView({ chatId }) {
   };
 
   const deleteMessageHandler = async (msgId) => {
-    if(confirm("Are You sure you want to delete this message? You are no longer to see this message!")){
-      await deleteMessage(msgId)
+    try {
+      if (confirm("Are You sure you want to delete this message? You are no longer to see this message!")) {
+        setDeleteMessageId(msgId)
+        await deleteMessage(msgId)
+        setDeleteMessageId(null)
+      }
+    } catch (error) {
+      setDeleteMessageId(null)
     }
   }
 
@@ -125,7 +132,7 @@ function ChatView({ chatId }) {
     try {
       const res = await deleteAllMessages(chatId)
       toast.success(res.data?.message)
-      showOptions(false)
+      setShowOptions(false)
     } catch (error) {
       toast.error(error.response?.data?.message)
     }
@@ -251,7 +258,7 @@ function ChatView({ chatId }) {
                       messages?.data?.data?.data.map((message, index) => (
                         <div 
                           key={index} 
-                          className={`flex items-start ${message.sender._id === userInfo._id ? 'justify-end' : 'justify-start'} ${deleteMessageMutation.status == 'pending' && hoveredMessage === message._id ? '' : 'message-animation active'}`}
+                          className={`flex items-start ${message.sender._id === userInfo._id ? 'justify-end' : 'justify-start'} ${deleteMessageMutation.status == 'pending' && deleteMessageId == message._id ? 'animate-pulse' : ''}`}
                         >
                           <div
                             className={`bg-${message.sender._id === userInfo._id ? 'blue' : 'yellow'}-500 text-white p-2 rounded-md mb-1 relative`}
@@ -277,7 +284,6 @@ function ChatView({ chatId }) {
                             { /* Delete Button */}
                             {
                               (hoveredMessage === message._id && message.sender._id === userInfo._id) && (
-                                deleteMessageMutation.status == 'pending' ? <ButtonLoader /> :
                                 <button
                                   className="absolute top-0 right-0 text-white hover:text-gray-200 focus:outline-none ml-2"
                                   onClick={() => { deleteMessageMutation.mutate(message._id) } }

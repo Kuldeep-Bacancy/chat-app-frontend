@@ -71,24 +71,3 @@
     transform: translateY(0);
   }
 }
-
-/* CSS within your Tailwind CSS file */
-.loading-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(255, 255, 255, 0.5);
-  /* Adjust the overlay color and opacity as needed */
-  display: flex;
-  items: center;
-  justify-content: center;
-  opacity: 0;
-  transition: opacity 0.5s ease-in-out;
-  /* Adjust the transition duration and easing if needed */
-}
-
-.loading-container.loading .loading-overlay {
-  opacity: 1;
-}
