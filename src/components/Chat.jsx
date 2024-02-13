@@ -4,8 +4,6 @@ import { getCurrentUserChats } from '../services/chats';
 import { useSelector } from 'react-redux';
 import ChatView from './ChatView';
 import LoadingList from './others/LoadingList';
-import { FaCircle } from 'react-icons/fa';
-import 'react-icons/fa';
 
 function Chat() {
   const { data: chatsData, isLoading, isError } = useQuery({
@@ -40,9 +38,6 @@ function Chat() {
                       <>
                         <span className="flex items-center justify-between">
                           {chat.users.find((user) => user._id !== userInfo._id)?.username}
-                          {chat.users.find((user) => user._id !== userInfo._id) && (
-                            <FaCircle className="text-green-500 ml-2" />
-                        )}
                         </span>
                       </>
                     )}
