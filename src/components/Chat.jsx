@@ -4,6 +4,8 @@ import { getCurrentUserChats } from '../services/chats';
 import { useSelector } from 'react-redux';
 import ChatView from './ChatView';
 import LoadingList from './others/LoadingList';
+import { FaCircle } from 'react-icons/fa';
+import 'react-icons/fa';
 
 function Chat() {
   const { data: chatsData, isLoading, isError } = useQuery({
@@ -33,10 +35,22 @@ function Chat() {
                     onClick={() => setSelectedChat(chat._id)}
                   >
                     {chat.isGroupChat ? (
-                      <span className="text-blue-500">{chat.name}</span>
+                      <span className="text-blue-500 flex items-center justify-between">{chat.name}</span>
                     ) : (
-                      chat.users.find((user) => user._id !== userInfo._id)?.username
+                      <>
+                        <span className="flex items-center justify-between">
+                          {chat.users.find((user) => user._id !== userInfo._id)?.username}
+                          {chat.users.find((user) => user._id !== userInfo._id) && (
+                            <FaCircle className="text-green-500 ml-2" />
+                        )}
+                        </span>
+                      </>
                     )}
+                    <span className="text-gray-500 text-sm">
+                      {
+                        chat.latestMessage && chat.isGroupChat ? `${chat.latestMessage.sender.username}: ${chat.latestMessage.content}` : chat.latestMessage?.content
+                      }
+                    </span>
                   </li>
                 ))
               }

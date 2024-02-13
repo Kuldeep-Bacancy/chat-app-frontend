@@ -99,7 +99,10 @@ function ChatView({ chatId }) {
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ['messages', chatId],
-      });
+      }),
+      queryClient.invalidateQueries({
+        queryKey: ['chats']
+      })
     },
   });
 
