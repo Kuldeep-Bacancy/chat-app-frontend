@@ -1,15 +1,18 @@
-import React, { useEffect, useMemo, useState, useRef } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { fetchChat } from '../services/chats';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import GroupSettingsModal from './GroupSettingsModal';
-import { createMessage, getMessages, deleteAllMessages, deleteMessage } from '../services/messages';
+import { createMessage, getMessages, deleteMessage } from '../services/messages';
 import { useForm } from 'react-hook-form';
+import ClearChat from './ClearChat';
 import io from "socket.io-client"
 import { formatTimestamp } from '../helpers/DateHelpers';
 import ButtonLoader from './others/ButtonLoader';
 import { toast } from 'react-toastify';
-
+import { FaCircle } from 'react-icons/fa';
+import 'react-icons/fa';
+import { addNotifications } from '../features/chatSlice';
 
 function ChatView({ chatId }) {
   const socket = useMemo(() => {
@@ -25,10 +28,12 @@ function ChatView({ chatId }) {
   const [showOptions, setShowOptions] = useState(false);
   const [hoveredMessage, setHoverdMessage] = useState(null)
   const [deleteMessageId, setDeleteMessageId] = useState(null)
+  const [notification, setNotification] = useState([])
+  const dispatch = useDispatch()
   const { register, handleSubmit, reset } = useForm();
-  const optionsRef = useRef(null);
 
   useEffect(() => {
+    socket.emit("setup", userInfo)
     if (chatId) {
       socket.emit("join-chat", chatId)
       socket.on("typing", () => setIsTyping(true));
@@ -47,6 +52,12 @@ function ChatView({ chatId }) {
         queryKey: ['messages', chatId],
       });
     })
+
+    socket.on('message-deleted', () => {
+      queryClient.invalidateQueries({
+        queryKey: ['messages', chatId],
+      });
+    })
   }, [chatId])
 
   useEffect(() => {
@@ -54,21 +65,13 @@ function ChatView({ chatId }) {
   }, [chatId])
 
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (optionsRef.current && !optionsRef.current.contains(event.target)) {
-        // Click outside the options menu, close it
-        setShowOptions(false);
+    socket.on('notification-received', (notificationData) => {
+      if (chatId != notificationData.chat._id){;
+        setNotification([notificationData, ...notification]);
+        dispatch(addNotifications([notificationData, ...notification]))
       }
-    };
-
-    // Attach event listener
-    document.addEventListener('mousedown', handleClickOutside);
-
-    return () => {
-      // Detach event listener on component unmount
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [optionsRef]);
+    })
+  }, [socket, chatId, notification])
 
   const chat = useQuery({
     queryKey: ['chat', chatId],
@@ -88,6 +91,7 @@ function ChatView({ chatId }) {
       const newData = { chatId: data.chatId, content: data.content, attachments: files }
       const res = await createMessage(newData);
       socket.emit("new-message", res?.data?.data)
+      socket.emit("notification-sent", res?.data?.data)
       reset();
     } catch (error) {
       toast.error(error?.response?.data?.message)
@@ -114,7 +118,8 @@ function ChatView({ chatId }) {
     try {
       if (confirm("Are You sure you want to delete this message? You are no longer to see this message!")) {
         setDeleteMessageId(msgId)
-        await deleteMessage(msgId)
+        const res = await deleteMessage(msgId)
+        socket.emit('delete-message', res?.data?.data)
         setDeleteMessageId(null)
       }
     } catch (error) {
@@ -124,25 +129,6 @@ function ChatView({ chatId }) {
 
   const deleteMessageMutation = useMutation({
     mutationFn: (msgId) => deleteMessageHandler(msgId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ['messages', chatId],
-      });
-    },
-  })
-
-  const deleteAllMessagesHandler = async (chatId) => {
-    try {
-      const res = await deleteAllMessages(chatId)
-      toast.success(res.data?.message)
-      setShowOptions(false)
-    } catch (error) {
-      toast.error(error.response?.data?.message)
-    }
-  }
-
-  const deleteAllMessagesMutation = useMutation({
-    mutationFn: (chatId) => deleteAllMessagesHandler(chatId),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ['messages', chatId],
@@ -191,7 +177,12 @@ function ChatView({ chatId }) {
           (
             <>
               <div className="flex items-center justify-between mb-2 bg-blue-500 p-2 rounded-md">
-                <h2 className="text-xl font-bold text-white">{chatName}</h2>
+                <div className='flex items-center'>
+                  <h2 className="text-xl font-bold text-white">{chatName}</h2>
+                  {!chatData?.isGroupChat && chatData?.users?.find((user) => user._id !== userInfo._id) && (
+                    <FaCircle className="text-green-500 ml-2" />
+                  )}
+                </div>
                 <div className="flex items-center space-x-2">
                   <button
                     className="text-white hover:text-gray-200 focus:outline-none"
@@ -237,19 +228,7 @@ function ChatView({ chatId }) {
                 </div>
                 {showModal && <GroupSettingsModal setShowModal={setShowModal} groupId={chatData._id} groupUsers={groupUsers} groupAdminName={groupAdminName} />}
               </div>
-              {showOptions && (
-                <div
-                  ref={optionsRef}
-                  className="absolute right-2 top-10 bg-white shadow-lg p-2 rounded-md max-w-xs z-10"
-                >
-                  <button 
-                    className="block w-full text-left hover:bg-gray-100 p-2"
-                    onClick={() => { deleteAllMessagesMutation.mutate(chatId) } }
-                  >
-                    Clear Chat
-                  </button>
-                </div>
-              )}
+              { showOptions && <ClearChat chatId={chatId} setShowOptions={setShowOptions} /> }
               <div className="flex-grow mb-2">
                 {
                   messages.isLoading ? (
