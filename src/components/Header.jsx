@@ -6,16 +6,16 @@ import { logoutUser } from '../services/users';
 import SearchUserModal from './SearchUserModal';
 import CreateGroupModal from './CreateGroupModal';
 import { toast } from 'react-toastify';
-import { setSelectedChat } from '../features/chatSlice';
+import { setSelectedChat, addNotifications, setShowNotifications } from '../features/chatSlice';
 
 function Header() {
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const isLoggedin = useSelector(state => state.authentication.isAuthenticated)
   const notifications = useSelector(state => state.chat.notifications)
+  const showNotifications = useSelector(state => state.chat.showNotifications)
   const [showModal, setShowModal] = useState(false)
   const [showGroupModal, setShowGroupModal] = useState(false)
-  const [showNotifications, setShowNotifications] = useState(false);
   const [notificationsPosition, setNotificationsPosition] = useState({ top: 0, left: 0 });
 
 
@@ -38,7 +38,7 @@ function Header() {
 
     // Set the position and toggle the visibility of notifications
     setNotificationsPosition(notificationsPosition);
-    setShowNotifications(!showNotifications);
+    dispatch(setShowNotifications(!showNotifications))
   };
 
   return (
@@ -72,7 +72,12 @@ function Header() {
                           <div 
                             className="text-gray-800 mb-2 cursor-pointer" 
                             key={index}
-                            onClick={() => dispatch(setSelectedChat(notification.chat._id))}
+                            onClick={() => {
+                              dispatch(setSelectedChat(notification.chat._id))
+                              dispatch(addNotifications(notifications.filter((not) => not !== notification)))
+                              dispatch(setShowNotifications(!showNotifications))
+                              }
+                            }
                           >
                             {
                               notification.chat.isGroupChat ? `A new message in ${notification.chat.name}` : `A new Message from ${notification.sender.username}`
